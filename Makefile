@@ -6,14 +6,14 @@
 #    By: zweng <zweng@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 14:11:10 by zweng             #+#    #+#              #
-#    Updated: 2023/08/15 14:11:18 by zweng            ###   ########.fr        #
+#    Updated: 2023/08/15 16:27:46 by zweng            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # ----- varaibles -----
 
 CC 			= gcc
-NAME 		= ft_nm
+NAME 		= ft_ping
 LIB_PATH 	= libft
 LIB 		= $(LIB_PATH)/libft.a
 HEADER_PATH = includes $(LIB_PATH)/includes
@@ -37,7 +37,7 @@ LDFLAGS 	= -L$(LIB_PATH) -lft
 DPFLAGS 	= -MD -MP
 
 CFLAGS 		=  $(foreach D, $(HEADER_PATH), -I$(D)) $(DPFLAGS) \
-				-Wall -Wextra -Werror \
+				#-Wall -Wextra -Werror \
 
 DEBUGF 		= #-fsanitize=address -g
 
