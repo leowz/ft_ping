@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:47:14 by zweng             #+#    #+#             */
-/*   Updated: 2023/08/31 18:30:24 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/01 18:52:51 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,10 @@ int	main(int ac, char **av)
 	int		index;
 	t_ping	*ping;
 
-	ft_memeset(&prog, 0, sizeof(prog));
+	ft_memset(&prog, 0, sizeof(prog));
 	prog.one = 1;
 	prog.prog_name = av[0];
-	arg_parse(av, &index, &parse_opt, &prog.options);
+	arg_parse(av, &index, &prog.options, &parse_opt);
 	if (ac < 2 || prog.options < 0)
 		usage();
 	ping = ping_init(ICMP_ECHO, getpid());
@@ -92,12 +92,12 @@ int	main(int ac, char **av)
 	return (prog.status);
 }
 
-void	sig_it(int signal)
+void	sig_int(int signal)
 {
 	stop = 1;
 }
 
-int	ping_run(t_ping *ping, int (*finish)(void), t_prog *prog)
+int	ping_run(t_ping *ping, int (*finish)(t_ping *p), t_prog *prog)
 {
 	struct timeval	resp_time, last, intvl, now;
 	struct timeval	*t;
@@ -120,11 +120,11 @@ int	ping_run(t_ping *ping, int (*finish)(void), t_prog *prog)
 	else
 		ping_set_interval(&intvl, ping->ping_interval);
 	gettimeofday(&last, NULL);
-	send_echo(ping);
+	send_echo(ping, prog);
 	while (!stop)
 	{
 		gettimeofday(&now, NULL);
-		resp_time = ping_get_resp_time(last, now);
+		resp_time = ping_get_resp_time(last, now, intvl);
 		//block to receive
 		if (ping_recv(ping) == 0)
 			nresp++;
@@ -137,7 +137,7 @@ int	ping_run(t_ping *ping, int (*finish)(void), t_prog *prog)
 		if (!ping->ping_count || ping->ping_num_xmit < ping->ping_count)
 		{
 			// block to send
-			send_echo(ping);
+			send_echo(ping, prog);
 			if (!(prog->options & OPT_QUIET) && (prog->options & OPT_FLOOD))
 				ft_putchar('.');
 			// check -w waittime
@@ -148,7 +148,7 @@ int	ping_run(t_ping *ping, int (*finish)(void), t_prog *prog)
 	}
 	ping_unset_data(ping);
 	if (finish)
-		return finish();
+		return finish(ping);
 	return (0);
 }
 
@@ -165,10 +165,11 @@ int	send_echo(t_ping *ping, t_prog *prog)
 		ping_set_data(ping, &tv, 0, sizeof(tv));
 		off += sizeof(tv);
 	}
-	if (prog->dat_buffer)
+	if (prog->data_buffer)
 	{
 		ping_set_data(ping, prog->data_buffer, off,
-			prog->data_length > off ? prog->data_length - off : data_length);
+			prog->data_length > off ? prog->data_length - off :
+			prog->data_length);
 	}
 	rc = ping_emit(ping);
 	if (rc < 0)
@@ -176,7 +177,7 @@ int	send_echo(t_ping *ping, t_prog *prog)
 	return (rc);
 }
 
-int	ping_finish(void)
+int	ping_finish(t_ping *ping)
 {
 	printf("--- %s ping statistics ---\n", ping->ping_hostname);
 	printf("%zu packets transmitted, ", ping->ping_num_xmit);

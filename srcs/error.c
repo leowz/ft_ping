@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/30 16:13:51 by zweng             #+#    #+#             */
-/*   Updated: 2023/08/30 16:38:24 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/01 18:11:53 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	error(int status, int errnum, const char *msg)
 {
-	printf(msg);
+	printf("%s\n", msg);
 	if (errnum)
 		printf("ft_ping: %s", strerror(errnum));
 	if (status)

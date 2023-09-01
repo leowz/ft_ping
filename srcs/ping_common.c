@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 17:10:07 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 00:17:16 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/01 18:17:47 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,16 +37,16 @@ int		_ping_setbuf(t_ping *p)
 {
 	if (!p->ping_buffer)
 	{	
-		ping->ping_buffer = malloc(_PING_BUFLEN(p));
+		p->ping_buffer = malloc(_PING_BUFLEN(p));
 		if (!p->ping_buffer)
 			return (-1);
 	}
-	if (!ping->ping_cktab)
+	if (!p->ping_cktab)
 	{	
 		p->ping_cktab = malloc(p->ping_cktab_size);
 		if (!p->ping_cktab)
 			return (-1);
-		ft_memset(p->ping_cktab, 0, ping->ping_cktab_size);
+		ft_memset(p->ping_cktab, 0, p->ping_cktab_size);
 	}
 	return (0);
 }
@@ -62,4 +62,23 @@ int		ping_set_data(t_ping *p, void *data, size_t off, size_t len)
 	icmp = (icmphdr_t *)p->ping_buffer;
 	ft_memcpy(icmp->icmp_data + off, data, len);
 	return (0);
+}
+
+void	_ping_freebuf(t_ping *p)
+{
+	if (p->ping_buffer)
+	{
+		free(p->ping_buffer);
+		p->ping_buffer = NULL;
+	}
+	if (p->ping_cktab)
+	{
+		free(p->ping_cktab);
+		p->ping_cktab = NULL;
+	}
+}
+
+void	ping_unset_data(t_ping *p)
+{
+	_ping_freebuf(p);
 }
