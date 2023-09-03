@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 18:23:29 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 18:50:16 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/03 17:59:54 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,10 @@ int	ping_echo(char *hostname, t_prog *prog)
 	ping_set_type(ping, ICMP_ECHO);
 	ping_set_packetsize(ping, prog->data_length);
 //	ping_set_event_handler(ping, handler, &ping_stat);
-//	if (ping_set_dest(ping, hostname))
-//		error(EXIT_FAILURE, 0, "unknown, host");
-	printf("PING %s : %zu data bytes", ping->ping_hostname, prog->data_length);
+	if (ping_set_dest(ping, hostname))
+		error(EXIT_FAILURE, 0, "unknown, host");
+	printf("PING %s (%s): %zu bytes of data.", ping->ping_hostname,
+			inet_ntoa(ping->ping_dest.sin_addr), prog->data_length);
 	if (prog->options & OPT_VERBOSE)
 		printf(", id 0x%04x = %u", ping->ping_ident, ping->ping_ident);
 	printf("\n");

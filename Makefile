@@ -6,7 +6,7 @@
 #    By: zweng <zweng@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 14:11:10 by zweng             #+#    #+#              #
-#    Updated: 2023/09/01 17:21:04 by zweng            ###   ########.fr        #
+#    Updated: 2023/09/03 15:33:33 by zweng            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,7 +39,7 @@ DPFLAGS 	= -MD -MP
 CFLAGS 		=  $(foreach D, $(HEADER_PATH), -I$(D)) $(DPFLAGS) \
 				#-Wall -Wextra -Werror \
 
-DEBUGF 		= #-fsanitize=address -g
+DEBUGF 		= -fsanitize=address -g
 
 # ----- part automatic -----
 SRCS 		= $(addprefix $(C_PATH)/,$(CFILES)) 

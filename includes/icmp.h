@@ -6,12 +6,22 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/01 17:37:29 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 17:40:44 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/03 15:42:13 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ICMP_H
 # define ICMP_H
+
+# include <stddef.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <sys/time.h>
+# include <netinet/in_systm.h>
+# include <netinet/in.h>
+# include <netinet/ip.h>
+# include <arpa/inet.h>
+
 typedef struct icmp_header icmphdr_t;
 
 struct icmp_header

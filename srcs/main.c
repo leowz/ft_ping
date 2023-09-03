@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:47:14 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 18:52:51 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/03 18:00:08 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,12 +72,15 @@ int	main(int ac, char **av)
 	if (ac < 2 || prog.options < 0)
 		usage();
 	ping = ping_init(ICMP_ECHO, getpid());
+	if (ping == NULL)
+		return (EXIT_FAILURE);
 	// set broadcast option at socket level at value 1
+	//printf("sizeof %ld\n", sizeof(prog.one));
 	ping_set_sockopt(ping, SO_BROADCAST, (char *)&prog.one, sizeof(prog.one));
 	ac -= index;
 	av += index;
 	init_data_buffer(&prog);
-	if (ping == NULL || prog.data_buffer == NULL)
+	if (prog.data_buffer == NULL)
 		return (EXIT_FAILURE);
 	prog.ping = ping;
 	while (ac)
@@ -97,7 +100,7 @@ void	sig_int(int signal)
 	stop = 1;
 }
 
-int	ping_run(t_ping *ping, int (*finish)(t_ping *p), t_prog *prog)
+int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 {
 	struct timeval	resp_time, last, intvl, now;
 	struct timeval	*t;
@@ -148,7 +151,7 @@ int	ping_run(t_ping *ping, int (*finish)(t_ping *p), t_prog *prog)
 	}
 	ping_unset_data(ping);
 	if (finish)
-		return finish(ping);
+		return finish(ping, prog);
 	return (0);
 }
 

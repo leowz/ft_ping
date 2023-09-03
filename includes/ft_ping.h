@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:48:45 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 18:52:53 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/03 17:59:49 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 # include <netinet/ip.h>
 # include <netinet/icmp6.h>
 # include <arpa/inet.h>
+# include <sys/types.h>
+# include <netdb.h>
 # include "libft.h"
 # include "icmp.h"
 
@@ -47,6 +49,8 @@
 # define SOPT_TSONLY		0x001
 # define SOPT_TSADDR		0x002
 # define SOPT_TSPRESPEC		0x004
+
+# define AI_CANONNAME		0x0002
 
 struct	ping_stat
 {
@@ -80,6 +84,7 @@ struct	ping_stat
 typedef struct s_ping
 {
 	int		ping_fd;
+	int		useless_ident;
 	int		ping_type;
 	size_t	ping_count;
 	struct	timeval ping_start_time;
@@ -143,6 +148,7 @@ int			ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *g),
 			t_prog *prog);
 int			ping_finish(t_ping *p);
 void		ping_unset_data(t_ping *p);
+int			ping_set_dest(t_ping *p, const char *host);
 int			echo_finish(t_ping *p, t_prog *prog);
 void		error(int status, int errnum, const char *msg);
 #endif

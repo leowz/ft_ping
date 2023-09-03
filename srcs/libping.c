@@ -6,18 +6,23 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 16:10:47 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 18:52:56 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/03 17:59:52 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ping.h"
+
+size_t	_ping_packetsize (t_ping *p)
+{
+  return PING_HEADER_LEN + p->ping_datalen;
+}
 
 t_ping	*ping_init(int type, int ident)
 {
 	int		fd;
 	t_ping	*p;
 
-	fd = socket(AF_INET, SOCK_RAW, ICMP);
+	fd = socket(AF_INET, SOCK_DGRAM, ICMP);
 	if (fd < 0)
 	{
 		printf("ping: %s\n", strerror(errno));
@@ -31,6 +36,7 @@ t_ping	*ping_init(int type, int ident)
 	}
 	ft_memset(p, 0, sizeof(*p));
 	p->ping_fd = fd;
+	p->useless_ident = 1;
 	p->ping_type = type;
 	p->ping_count = 0;
 	p->ping_interval = PING_DEFAULT_INTERVAL;
@@ -209,4 +215,24 @@ void	ping_reset(t_ping *p)
   p->ping_num_xmit = 0;
   p->ping_num_recv = 0;
   p->ping_num_rept = 0;
+}
+
+int		ping_set_dest(t_ping *p, const char *host)
+{
+	int rc;
+	struct addrinfo hints, *res;
+
+	ft_memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_flags = AI_CANONNAME;
+	rc = getaddrinfo(host, NULL, &hints, &res);
+	if (rc)
+		return (1);
+	ft_memcpy(&p->ping_dest, res->ai_addr, res->ai_addrlen);
+	if (res->ai_canonname)
+		p->ping_hostname = ft_strdup(res->ai_canonname);
+	else
+		p->ping_hostname = ft_strdup(host);
+	freeaddrinfo(res);
+	return (0);
 }
