@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 16:10:47 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/03 17:59:52 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/04 18:37:39 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,16 @@ t_ping	*ping_init(int type, int ident)
 	int		fd;
 	t_ping	*p;
 
-	fd = socket(AF_INET, SOCK_DGRAM, ICMP);
+	fd = socket(AF_INET, SOCK_RAW, ICMP);
 	if (fd < 0)
 	{
-		printf("ping: %s\n", strerror(errno));
-		return (NULL);
+		fd = socket(AF_INET, SOCK_DGRAM, ICMP);
+		if (fd < 0)
+		{
+			printf("ping: %s\n", strerror(errno));
+			return (NULL);
+		}
+		p->useless_ident++;
 	}
 	p = malloc(sizeof(*p));
 	if (!p)
@@ -36,7 +41,6 @@ t_ping	*ping_init(int type, int ident)
 	}
 	ft_memset(p, 0, sizeof(*p));
 	p->ping_fd = fd;
-	p->useless_ident = 1;
 	p->ping_type = type;
 	p->ping_count = 0;
 	p->ping_interval = PING_DEFAULT_INTERVAL;
@@ -156,7 +160,7 @@ static int	my_echo_reply(t_ping *p, icmphdr_t *icmp)
 		&& (ntohs(orig_icmp->icmp_id) == p->ping_ident));
 }
 
-int		ping_recv(t_ping *p)
+int		ping_recv(t_ping *p, t_prog *prog)
 {
 	socklen_t		fromlen;
 	int				n, rc;
@@ -183,7 +187,7 @@ int		ping_recv(t_ping *p)
 	}
 	if (icmp->icmp_type == ICMP_ECHOREPLY)
 	{
-		if (ntohs(icmp->icmp_id) != p->ping_ident)
+		if (ntohs(icmp->icmp_id) != p->ping_ident && p->useless_ident == 0)
 			return (-1);
 		if (rc)
 			printf("checksum mismatch\n");
@@ -199,6 +203,9 @@ int		ping_recv(t_ping *p)
 			_ping_set(p, ntohs(icmp->icmp_seq));
 			dupflag = 0;
 		}
+		if (p->ping_event)
+			p->ping_event(dupflag ? PEV_DUPLICATE : PEV_RESPONSE,
+				p->ping_closure, &p->ping_dest, ip, icmp, n, prog);
 	}
 	else if (icmp->icmp_type == ICMP_ECHO)
 		return (-1);
@@ -206,6 +213,9 @@ int		ping_recv(t_ping *p)
 	{
 		if (!my_echo_reply(p, icmp))
 			return (-1);
+		if (p->ping_event)
+			p->ping_event(PEV_NOECHO, p->ping_closure, &p->ping_dest,
+				ip, icmp, n, prog);
 	}
 	return (0);
 }
@@ -235,4 +245,10 @@ int		ping_set_dest(t_ping *p, const char *host)
 		p->ping_hostname = ft_strdup(host);
 	freeaddrinfo(res);
 	return (0);
+}
+
+void	ping_set_event_handler (t_ping *p, ping_efp pf, void *closure)
+{
+	p->ping_event = pf;
+	p->ping_closure = closure;
 }

@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 17:10:07 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/01 18:17:47 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/04 18:24:42 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,3 +82,14 @@ void	ping_unset_data(t_ping *p)
 {
 	_ping_freebuf(p);
 }
+
+void tvsub (struct timeval *out, struct timeval *in)
+{
+	if ((out->tv_usec -= in->tv_usec) < 0)
+	{
+		--out->tv_sec;
+		out->tv_usec += 1000000;
+	}
+	out->tv_sec -= in->tv_sec;
+}
+

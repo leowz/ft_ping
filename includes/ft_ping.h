@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:48:45 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/03 17:59:49 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/04 18:36:43 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ struct	ping_stat
    want to follow the traditional behaviour of ping.  */
 # define DEFAULT_PING_COUNT 0
 
+# define IPV4_HEADER_LEN	20
 # define PING_HEADER_LEN	(ICMP_MINLEN)
 # define PING_TIMING(s)		((s) >= sizeof (struct timeval))
 # define PING_DATALEN		(64 - PING_HEADER_LEN)  /* default data length */
@@ -80,6 +81,13 @@ struct	ping_stat
 # define MAX_IPOPTLEN		40
 
 # define _PING_BUFLEN(p) 	(MAXIPLEN + (p)->ping_datalen + ICMP_TSLEN)
+# define USLEEP_DEFUALT		1000000
+
+
+typedef struct s_prog	t_prog;
+typedef int (*ping_efp) (int code, void *closure, struct sockaddr_in * dest,
+			struct ip * ip, icmphdr_t * icmp,
+			int datalen, t_prog *p);
 
 typedef struct s_ping
 {
@@ -89,12 +97,11 @@ typedef struct s_ping
 	size_t	ping_count;
 	struct	timeval ping_start_time;
 	size_t	ping_interval;
-	// ping_address to
 	struct sockaddr_in	ping_dest;
 	char	*ping_hostname;
 	size_t	ping_datalen;
 	int		ping_ident;
-	// ping event;
+	ping_efp	ping_event;
 	void	*ping_closure;
 	
 	/* Runtime info */
@@ -102,8 +109,6 @@ typedef struct s_ping
 	char	*ping_cktab;
 
 	unsigned char	*ping_buffer;
-	// ping address from
-	struct sockaddr_in	ping_from;
 	size_t	ping_num_xmit;
 	size_t	ping_num_recv;
 	size_t	ping_num_rept;
@@ -134,8 +139,7 @@ void		_ping_set(t_ping *p, size_t bit);
 void		_ping_clr(t_ping *p, size_t bit);
 int			_ping_tst(t_ping *p, size_t bit);
 int			ping_emit(t_ping *p);
-int			ping_recv(t_ping *p);
-int			ping_recv(t_ping *p);
+int			ping_recv(t_ping *p, t_prog *prog);
 void		ping_set_sockopt(t_ping *ping, int opt_name, void *val,
 			int valsize);
 void		init_data_buffer(t_prog *prog);
@@ -149,6 +153,8 @@ int			ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *g),
 int			ping_finish(t_ping *p);
 void		ping_unset_data(t_ping *p);
 int			ping_set_dest(t_ping *p, const char *host);
+void    	ping_set_event_handler (t_ping *p, ping_efp pf, void *closure);
 int			echo_finish(t_ping *p, t_prog *prog);
 void		error(int status, int errnum, const char *msg);
+void		tvsub(struct timeval *out, struct timeval *in);
 #endif

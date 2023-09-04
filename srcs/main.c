@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:47:14 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/03 18:00:08 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/04 18:29:43 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 		gettimeofday(&now, NULL);
 		resp_time = ping_get_resp_time(last, now, intvl);
 		//block to receive
-		if (ping_recv(ping) == 0)
+		if (ping_recv(ping, prog) == 0)
 			nresp++;
 		if (t == 0)
 		{
@@ -137,6 +137,7 @@ int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 			t = &now;
 		}
 		// check -w waittime, -c count
+		usleep(USLEEP_DEFUALT);
 		if (!ping->ping_count || ping->ping_num_xmit < ping->ping_count)
 		{
 			// block to send
