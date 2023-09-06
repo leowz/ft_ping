@@ -207,9 +207,6 @@ int		ping_recv(t_ping *p, t_prog *prog)
 	{
 		if (!my_echo_reply(p, icmp))
 			return (-1);
-		if (p->ping_event)
-			p->ping_event(PEV_NOECHO, p->ping_closure, &p->ping_dest,
-				ip, icmp, n, prog);
 	}
 	return (0);
 }

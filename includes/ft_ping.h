@@ -82,7 +82,6 @@ struct	ping_stat
 
 # define _PING_BUFLEN(p) 	(MAXIPLEN + (p)->ping_datalen + ICMP_TSLEN)
 
-
 typedef struct s_prog	t_prog;
 typedef int (*ping_efp) (int code, void *closure, struct sockaddr_in * dest,
 			struct ip * ip, icmphdr_t * icmp,

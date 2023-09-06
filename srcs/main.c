@@ -12,7 +12,7 @@
 
 #include "ft_ping.h"
 
-int	stop = 0;
+static int	g_stop = 0;
 
 static void	usage()
 {
@@ -95,20 +95,18 @@ int	main(int ac, char **av)
 
 void	sig_int(int signal)
 {
-	stop = 1;
+	g_stop = 1;
 }
 
 int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 {
-	struct timeval	intvl;
 	int				finishing;
 	size_t			i;	
 	int				n;
 
 	finishing = 0;
 	signal(SIGINT, sig_int);
-	ping_set_interval(&intvl, ping->ping_interval);
-	while (!stop)
+	while (!g_stop)
 	{
 		if (!ping->ping_count || ping->ping_num_xmit < ping->ping_count)
 		{
@@ -119,7 +117,7 @@ int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 		else
 			break ;
 		ping_recv(ping, prog);
-		usleep(intvl.tv_sec * 1000000 + intvl.tv_usec);
+		usleep(ping->ping_interval * 1000);
 	}
 	ping_unset_data(ping);
 	if (finish)

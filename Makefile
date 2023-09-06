@@ -39,7 +39,7 @@ DPFLAGS 	= -MD -MP
 CFLAGS 		=  $(foreach D, $(HEADER_PATH), -I$(D)) $(DPFLAGS) \
 				#-Wall -Wextra -Werror \
 
-DEBUGF 		= -fsanitize=address -g
+DEBUGF 		= #-fsanitize=address -g
 
 # ----- part automatic -----
 SRCS 		= $(addprefix $(C_PATH)/,$(CFILES)) 
