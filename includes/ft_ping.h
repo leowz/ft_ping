@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:48:45 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/04 18:36:43 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/05 16:05:52 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,6 @@ struct	ping_stat
 # define MAX_IPOPTLEN		40
 
 # define _PING_BUFLEN(p) 	(MAXIPLEN + (p)->ping_datalen + ICMP_TSLEN)
-# define USLEEP_DEFUALT		1000000
 
 
 typedef struct s_prog	t_prog;
@@ -91,27 +90,27 @@ typedef int (*ping_efp) (int code, void *closure, struct sockaddr_in * dest,
 
 typedef struct s_ping
 {
-	int		ping_fd;
-	int		useless_ident;
-	int		ping_type;
-	size_t	ping_count;
-	struct	timeval ping_start_time;
-	size_t	ping_interval;
+	int				ping_fd;
+	int				useless_ident;
+	int				ping_type;
+	size_t			ping_count;
+	struct timeval	ping_start_time;
+	size_t			ping_interval;
 	struct sockaddr_in	ping_dest;
-	char	*ping_hostname;
-	size_t	ping_datalen;
-	int		ping_ident;
-	ping_efp	ping_event;
-	void	*ping_closure;
+	char			*ping_hostname;
+	size_t			ping_datalen;
+	int				ping_ident;
+	ping_efp		ping_event;
+	void			*ping_closure;
 	
 	/* Runtime info */
-	int		ping_cktab_size;
-	char	*ping_cktab;
+	int				ping_cktab_size;
+	char			*ping_cktab;
 
 	unsigned char	*ping_buffer;
-	size_t	ping_num_xmit;
-	size_t	ping_num_recv;
-	size_t	ping_num_rept;
+	size_t			ping_num_xmit;
+	size_t			ping_num_recv;
+	size_t			ping_num_rept;
 }			t_ping;
 
 typedef struct s_prog

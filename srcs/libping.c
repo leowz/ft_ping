@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 16:10:47 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/04 18:37:39 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/05 14:21:23 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,12 +60,6 @@ void	ping_set_packetsize(t_ping *p, size_t size)
 {
 	p->ping_datalen = size;
 }
-
-/*void	ping_set_event_handler(t_ping *ping, ping_efp pf, void *closure)
-{
-	ping->ping_event.handler = pf;
-	ping->ping_closure = closure;
-}*/
 
 void	ping_set_interval(struct timeval *intvl, size_t ping_interval)
 {

@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/15 14:47:14 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/04 18:29:43 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/05 14:29:44 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,6 @@ int	main(int ac, char **av)
 	ping = ping_init(ICMP_ECHO, getpid());
 	if (ping == NULL)
 		return (EXIT_FAILURE);
-	// set broadcast option at socket level at value 1
-	//printf("sizeof %ld\n", sizeof(prog.one));
 	ping_set_sockopt(ping, SO_BROADCAST, (char *)&prog.one, sizeof(prog.one));
 	ac -= index;
 	av += index;
@@ -102,53 +100,26 @@ void	sig_int(int signal)
 
 int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 {
-	struct timeval	resp_time, last, intvl, now;
-	struct timeval	*t;
+	struct timeval	intvl;
 	int				finishing;
-	size_t			nresp, i;	
+	size_t			i;	
 	int				n;
 
-	t = NULL;
 	finishing = 0;
-	nresp = 0;
 	signal(SIGINT, sig_int);
-	ft_memset(&resp_time, 0, sizeof(resp_time));
-	ft_memset(&intvl, 0, sizeof(intvl));
-	ft_memset(&now, 0, sizeof(now));
-	if (prog->options & OPT_FLOOD)
-	{
-		intvl.tv_sec = 0;
-		intvl.tv_usec = 10000;
-	}
-	else
-		ping_set_interval(&intvl, ping->ping_interval);
-	gettimeofday(&last, NULL);
-	send_echo(ping, prog);
+	ping_set_interval(&intvl, ping->ping_interval);
 	while (!stop)
 	{
-		gettimeofday(&now, NULL);
-		resp_time = ping_get_resp_time(last, now, intvl);
-		//block to receive
-		if (ping_recv(ping, prog) == 0)
-			nresp++;
-		if (t == 0)
-		{
-			gettimeofday(&now, NULL);
-			t = &now;
-		}
-		// check -w waittime, -c count
-		usleep(USLEEP_DEFUALT);
 		if (!ping->ping_count || ping->ping_num_xmit < ping->ping_count)
 		{
-			// block to send
 			send_echo(ping, prog);
 			if (!(prog->options & OPT_QUIET) && (prog->options & OPT_FLOOD))
 				ft_putchar('.');
-			// check -w waittime
 		}
 		else
 			break ;
-		gettimeofday(&last, NULL);
+		ping_recv(ping, prog);
+		usleep(intvl.tv_sec * 1000000 + intvl.tv_usec);
 	}
 	ping_unset_data(ping);
 	if (finish)

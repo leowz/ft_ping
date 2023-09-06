@@ -6,7 +6,7 @@
 /*   By: zweng <zweng@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 18:23:29 by zweng             #+#    #+#             */
-/*   Updated: 2023/09/04 18:37:03 by zweng            ###   ########.fr       */
+/*   Updated: 2023/09/05 17:31:52 by zweng            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,17 @@ int	ping_echo(char *hostname, t_prog *prog)
 	int					status;
 	struct ping_stat	ping_stat;
 	t_ping				*ping;
+	char				ip_readable[INET_ADDRSTRLEN];
 
 	ping = prog->ping;
 	ping_set_type(ping, ICMP_ECHO);
 	ping_set_packetsize(ping, prog->data_length);
 	ping_set_event_handler(ping, handler, &ping_stat);
 	if (ping_set_dest(ping, hostname))
-		error(EXIT_FAILURE, 0, "unknown, host");
+		error(EXIT_FAILURE, 0, "unknown host");
 	printf("PING %s (%s) %zu(%zu) bytes of data.", ping->ping_hostname,
-			inet_ntoa(ping->ping_dest.sin_addr), prog->data_length,
+		inet_ntop(AF_INET, &ping->ping_dest.sin_addr, ip_readable,
+			sizeof(ip_readable)), prog->data_length,
 			prog->data_length + PING_HEADER_LEN + IPV4_HEADER_LEN);
 	if (prog->options & OPT_VERBOSE)
 		printf(", id 0x%04x = %u", ping->ping_ident, ping->ping_ident);
@@ -69,6 +71,7 @@ int	print_echo(int dupflag, struct ping_stat *ping_stat,
 	struct timeval	tv;
 	int				timing;
 	double			triptime;
+	char			ip_readable[INET_ADDRSTRLEN];
 
 	timing = 0;
 	triptime = 0.0;
@@ -100,7 +103,8 @@ int	print_echo(int dupflag, struct ping_stat *ping_stat,
 		return (0);
 	}
 	printf("%d bytes from %s: icmp_seq=%u", datalen,
-		inet_ntoa(*(struct in_addr *) &dest->sin_addr.s_addr),
+		inet_ntop(AF_INET, &dest->sin_addr.s_addr,
+			ip_readable, sizeof(ip_readable)),
 		ntohs(icmp->icmp_seq));
 	printf(" ttl=%d", ip->ip_ttl);
 	if (timing)
@@ -124,7 +128,7 @@ int	echo_finish(t_ping *p, t_prog *prog)
 		total = p->ping_num_recv + p->ping_num_rept;
 		avg = ping_stat->tsum / total;
 		vari = ping_stat->tsumsq / total - avg * avg;
-		printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
+		printf("rtt min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
 				ping_stat->tmin, avg, ping_stat->tmax, vari);
 	}
 	return (p->ping_num_recv == 0);
