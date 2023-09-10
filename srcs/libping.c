@@ -21,7 +21,9 @@ t_ping	*ping_init(int type, int ident)
 {
 	int		fd;
 	t_ping	*p;
+	int		useless_ident;
 
+	useless_ident = 0;
 	fd = socket(AF_INET, SOCK_RAW, ICMP);
 	if (fd < 0)
 	{
@@ -31,7 +33,7 @@ t_ping	*ping_init(int type, int ident)
 			printf("ping: %s\n", strerror(errno));
 			return (NULL);
 		}
-		p->useless_ident++;
+		useless_ident++;
 	}
 	p = malloc(sizeof(*p));
 	if (!p)
@@ -46,6 +48,7 @@ t_ping	*ping_init(int type, int ident)
 	p->ping_interval = PING_DEFAULT_INTERVAL;
 	p->ping_datalen = sizeof(icmphdr_t);
 	p->ping_ident = ident & 0xFFFF;
+	p->useless_ident = useless_ident;
 	p->ping_cktab_size = PING_CKTABSIZE;
 	gettimeofday(&p->ping_start_time, NULL);
 	return (p);
