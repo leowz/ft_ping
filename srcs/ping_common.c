@@ -17,18 +17,21 @@ void	ping_set_sockopt(t_ping *ping, int opt_name, void *val, int valsize)
 	setsockopt(ping->ping_fd, SOL_SOCKET, opt_name, (char *)&val, valsize);
 }
 
-void	init_data_buffer(t_prog *prog)
+void	init_data_buffer()
 {
 	size_t			i;
 
-	prog->data_length = PING_DATALEN;
-	prog->data_buffer = malloc(prog->data_length);
-	if (!prog->data_buffer)
-		return ;
-	i = 0;
-	while (i < prog->data_length)
+	g_prog.data_length = PING_DATALEN;
+	g_prog.data_buffer = malloc(g_prog.data_length);
+	if (!g_prog.data_buffer)
 	{
-		prog->data_buffer[i] = i;
+		printf("%s\n", strerror(errno));
+		return ;
+	}
+	i = 0;
+	while (i < g_prog.data_length)
+	{
+		g_prog.data_buffer[i] = i;
 		i++;
 	}
 }

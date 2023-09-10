@@ -82,10 +82,9 @@ struct	ping_stat
 
 # define _PING_BUFLEN(p) 	(MAXIPLEN + (p)->ping_datalen + ICMP_TSLEN)
 
-typedef struct s_prog	t_prog;
 typedef int (*ping_efp) (int code, void *closure, struct sockaddr_in * dest,
 			struct ip * ip, icmphdr_t * icmp,
-			int datalen, t_prog *p);
+			int datalen);
 
 typedef struct s_ping
 {
@@ -110,7 +109,7 @@ typedef struct s_ping
 	size_t			ping_num_xmit;
 	size_t			ping_num_recv;
 	size_t			ping_num_rept;
-}			t_ping;
+}					t_ping;
 
 typedef struct s_prog
 {
@@ -121,7 +120,10 @@ typedef struct s_prog
 	unsigned char	*data_buffer;
 	size_t			data_length;
 	t_ping			*ping;
+	int				stop;
 }					t_prog;
+
+extern t_prog		g_prog;
 
 #define _C_BIT(p,bit)   (p)->ping_cktab[(bit)>>3]	/* byte in ck array */
 #define _C_MASK(bit)    (1 << ((bit) & 0x07))
@@ -137,22 +139,21 @@ void		_ping_set(t_ping *p, size_t bit);
 void		_ping_clr(t_ping *p, size_t bit);
 int			_ping_tst(t_ping *p, size_t bit);
 int			ping_emit(t_ping *p);
-int			ping_recv(t_ping *p, t_prog *prog);
+int			ping_recv(t_ping *p);
 void		ping_set_sockopt(t_ping *ping, int opt_name, void *val,
 			int valsize);
-void		init_data_buffer(t_prog *prog);
+void		init_data_buffer();
 int			_ping_setbuf(t_ping *p);
 int			ping_set_data(t_ping *p, void *data, size_t off, size_t len);
-int			ping_echo(char *hostname, t_prog *prog);
+int			ping_echo(char *hostname);
 void		ping_reset(t_ping *p);
-int			send_echo(t_ping *ping, t_prog *prog);
-int			ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *g),
-			t_prog *prog);
+int			send_echo(t_ping *ping);
+int			ping_run(t_ping *ping, int (*finish)(t_ping *p));
 int			ping_finish(t_ping *p);
 void		ping_unset_data(t_ping *p);
 int			ping_set_dest(t_ping *p, const char *host);
 void    	ping_set_event_handler (t_ping *p, ping_efp pf, void *closure);
-int			echo_finish(t_ping *p, t_prog *prog);
+int			echo_finish(t_ping *p);
 void		error(int status, int errnum, const char *msg);
 void		tvsub(struct timeval *out, struct timeval *in);
 #endif

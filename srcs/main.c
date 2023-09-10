@@ -12,7 +12,7 @@
 
 #include "ft_ping.h"
 
-static int	g_stop = 0;
+t_prog		g_prog;
 
 static void	usage()
 {
@@ -61,44 +61,46 @@ static void	arg_parse(char **av, int *index, int *options,
 
 int	main(int ac, char **av)
 {
-	t_prog	prog;
 	int		index;
 	t_ping	*ping;
 
-	ft_memset(&prog, 0, sizeof(prog));
-	prog.one = 1;
-	prog.prog_name = av[0];
-	arg_parse(av, &index, &prog.options, &parse_opt);
-	if (ac < 2 || prog.options < 0)
+	ft_memset(&g_prog, 0, sizeof(g_prog));
+	g_prog.one = 1;
+	g_prog.prog_name = av[0];
+	arg_parse(av, &index, &g_prog.options, &parse_opt);
+	if (ac < 2 || g_prog.options < 0)
 		usage();
 	ping = ping_init(ICMP_ECHO, getpid());
 	if (ping == NULL)
 		return (EXIT_FAILURE);
-	ping_set_sockopt(ping, SO_BROADCAST, (char *)&prog.one, sizeof(prog.one));
+	ping_set_sockopt(ping, SO_BROADCAST, (char *)&g_prog.one, sizeof(g_prog.one));
 	ac -= index;
 	av += index;
-	init_data_buffer(&prog);
-	if (prog.data_buffer == NULL)
+	init_data_buffer();
+	if (g_prog.data_buffer == NULL)
+	{
+		free(ping);
 		return (EXIT_FAILURE);
-	prog.ping = ping;
+	}
+	g_prog.ping = ping;
 	while (ac)
 	{
-		prog.status |= ping_echo(*av, &prog);
+		g_prog.status |= ping_echo(*av);
 		ping_reset(ping);
 		ac--;
 		av++;
 	}
-	free(ping);
-	free(prog.data_buffer);
-	return (prog.status);
+	free(g_prog.ping);
+	free(g_prog.data_buffer);
+	return (g_prog.status);
 }
 
 void	sig_int(int signal)
 {
-	g_stop = 1;
+	g_prog.stop = 1;
 }
 
-int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
+int	ping_run(t_ping *ping, int (*finish)(t_ping *p))
 {
 	int				finishing;
 	size_t			i;	
@@ -106,43 +108,43 @@ int	ping_run(t_ping *ping, int (*finish)(t_ping *p, t_prog *pr), t_prog *prog)
 
 	finishing = 0;
 	signal(SIGINT, sig_int);
-	while (!g_stop)
+	while (!g_prog.stop)
 	{
 		if (!ping->ping_count || ping->ping_num_xmit < ping->ping_count)
 		{
-			send_echo(ping, prog);
-			if (!(prog->options & OPT_QUIET) && (prog->options & OPT_FLOOD))
+			send_echo(ping);
+			if (!(g_prog.options & OPT_QUIET) && (g_prog.options & OPT_FLOOD))
 				ft_putchar('.');
 		}
 		else
 			break ;
-		ping_recv(ping, prog);
+		ping_recv(ping);
 		usleep(ping->ping_interval * 1000);
 	}
 	ping_unset_data(ping);
 	if (finish)
-		return finish(ping, prog);
+		return finish(ping);
 	return (0);
 }
 
-int	send_echo(t_ping *ping, t_prog *prog)
+int	send_echo(t_ping *ping)
 {
 	size_t			off;
 	int				rc;
 	struct timeval	tv;
 
 	off = 0;
-	if (PING_TIMING(prog->data_length))
+	if (PING_TIMING(g_prog.data_length))
 	{
 		gettimeofday(&tv, NULL);
 		ping_set_data(ping, &tv, 0, sizeof(tv));
 		off += sizeof(tv);
 	}
-	if (prog->data_buffer)
+	if (g_prog.data_buffer)
 	{
-		ping_set_data(ping, prog->data_buffer, off,
-			prog->data_length > off ? prog->data_length - off :
-			prog->data_length);
+		ping_set_data(ping, g_prog.data_buffer, off,
+			g_prog.data_length > off ? g_prog.data_length - off :
+			g_prog.data_length);
 	}
 	rc = ping_emit(ping);
 	if (rc < 0)

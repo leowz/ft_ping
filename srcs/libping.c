@@ -54,46 +54,11 @@ t_ping	*ping_init(int type, int ident)
 	return (p);
 }
 
-void	ping_set_type(t_ping *p, int type)
-{
-	p->ping_type = type;
-}
-
-void	ping_set_packetsize(t_ping *p, size_t size)
-{
-	p->ping_datalen = size;
-}
-
 void	ping_set_interval(struct timeval *intvl, size_t ping_interval)
 {
 	intvl->tv_sec = ping_interval / PING_PRECISION;
 	intvl->tv_usec = ((ping_interval) % PING_PRECISION)
 		* (1000000 / PING_PRECISION);
-}
-
-struct timeval	ping_get_resp_time(struct timeval last, struct timeval now,
-		struct timeval intvl)
-{
-	struct timeval	resp_time;
-
-	resp_time.tv_sec = last.tv_sec + intvl.tv_sec - now.tv_sec;
-	resp_time.tv_usec = last.tv_usec + intvl.tv_usec - now.tv_usec;
-	while (resp_time.tv_usec < 0)
-	{
-		resp_time.tv_usec += 1000000;
-		resp_time.tv_sec--;
-	}
-	while (resp_time.tv_usec >= 1000000)
-	{
-		resp_time.tv_usec -= 1000000;
-		resp_time.tv_sec++;
-	}
-	if (resp_time.tv_sec < 0)
-	{
-		resp_time.tv_sec = 0;
-		resp_time.tv_usec = 0;
-	}
-	return (resp_time);
 }
 
 void	_ping_set(t_ping *p, size_t bit)
@@ -157,7 +122,7 @@ static int	my_echo_reply(t_ping *p, icmphdr_t *icmp)
 		&& (ntohs(orig_icmp->icmp_id) == p->ping_ident));
 }
 
-int		ping_recv(t_ping *p, t_prog *prog)
+int		ping_recv(t_ping *p)
 {
 	socklen_t		fromlen;
 	int				n, rc;
@@ -202,7 +167,7 @@ int		ping_recv(t_ping *p, t_prog *prog)
 		}
 		if (p->ping_event)
 			p->ping_event(dupflag ? PEV_DUPLICATE : PEV_RESPONSE,
-				p->ping_closure, &p->ping_dest, ip, icmp, n, prog);
+				p->ping_closure, &p->ping_dest, ip, icmp, n);
 	}
 	else if (icmp->icmp_type == ICMP_ECHO)
 		return (-1);
@@ -239,10 +204,4 @@ int		ping_set_dest(t_ping *p, const char *host)
 		p->ping_hostname = ft_strdup(host);
 	freeaddrinfo(res);
 	return (0);
-}
-
-void	ping_set_event_handler (t_ping *p, ping_efp pf, void *closure)
-{
-	p->ping_event = pf;
-	p->ping_closure = closure;
 }

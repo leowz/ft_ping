@@ -14,54 +14,54 @@
 
 static int print_echo(int dupflag, struct ping_stat *ping_stat,
 					  struct sockaddr_in *dest, struct ip *ip,
-					  icmphdr_t *icmp, int datalen, t_prog *prog);
+					  icmphdr_t *icmp, int datalen);
 static int handler(int code, void *closure, struct sockaddr_in *dest,
-				   struct ip *ip, icmphdr_t *icmp, int datalen,
-				   t_prog *prog);
-static void print_ip_opt(struct ip *ip, int hlen, t_prog *prog);
+				   struct ip *ip, icmphdr_t *icmp, int datalen);
+static void print_ip_opt(struct ip *ip, int hlen);
 
-int ping_echo(char *hostname, t_prog *prog)
+int ping_echo(char *hostname)
 {
 	int					status;
 	struct ping_stat	ping_stat;
 	t_ping				*ping;
 	char				ip_readable[INET_ADDRSTRLEN];
 
-	ping = prog->ping;
+	ping = g_prog.ping;
 	ping_stat.tmin = 999999999.0;
-	ping_set_type(ping, ICMP_ECHO);
-	ping_set_packetsize(ping, prog->data_length);
-	ping_set_event_handler(ping, handler, &ping_stat);
+	ping_stat.tmax = 0.0;
+	ping->ping_type = ICMP_ECHO;
+	ping->ping_datalen = g_prog.data_length;
+	ping->ping_event = handler;
+	ping->ping_closure = &ping_stat;
 	if (ping_set_dest(ping, hostname))
 		error(EXIT_FAILURE, 0, "unknown host");
 	printf("PING %s (%s) %zu(%zu) bytes of data.", ping->ping_hostname,
 		   inet_ntop(AF_INET, &ping->ping_dest.sin_addr, ip_readable,
 					 sizeof(ip_readable)),
-		   prog->data_length,
-		   prog->data_length + PING_HEADER_LEN + IPV4_HEADER_LEN);
-	if (prog->options & OPT_VERBOSE)
+		   g_prog.data_length,
+		   g_prog.data_length + PING_HEADER_LEN + IPV4_HEADER_LEN);
+	if (g_prog.options & OPT_VERBOSE)
 		printf(", id 0x%04x = %u", ping->ping_ident, ping->ping_ident);
 	printf("\n");
-	status = ping_run(ping, echo_finish, prog);
+	status = ping_run(ping, echo_finish);
 	free(ping->ping_hostname);
 	return (status);
 }
 
 int handler(int code, void *closure, struct sockaddr_in *dest,
-			struct ip *ip, icmphdr_t *icmp, int datalen,
-			t_prog *prog)
+			struct ip *ip, icmphdr_t *icmp, int datalen)
 {
 	if (code == PEV_RESPONSE || code == PEV_DUPLICATE)
 	{
 		print_echo(code == PEV_DUPLICATE, (struct ping_stat *)closure,
-				   dest, ip, icmp, datalen, prog);
+				   dest, ip, icmp, datalen);
 	}
 	return (0);
 }
 
 int print_echo(int dupflag, struct ping_stat *ping_stat,
 			   struct sockaddr_in *dest, struct ip *ip,
-			   icmphdr_t *icmp, int datalen, t_prog *prog)
+			   icmphdr_t *icmp, int datalen)
 {
 	int 			hlen;
 	struct timeval	tv;
@@ -91,9 +91,9 @@ int print_echo(int dupflag, struct ping_stat *ping_stat,
 		if (triptime > ping_stat->tmax)
 			ping_stat->tmax = triptime;
 	}
-	if (prog->options & OPT_QUIET)
+	if (g_prog.options & OPT_QUIET)
 		return (0);
-	if (prog->options & OPT_FLOOD)
+	if (g_prog.options & OPT_FLOOD)
 	{
 		ft_putchar('\b');
 		return (0);
@@ -111,13 +111,13 @@ int print_echo(int dupflag, struct ping_stat *ping_stat,
 	return (0);
 }
 
-int echo_finish(t_ping *p, t_prog *prog)
+int echo_finish(t_ping *p)
 {
 	struct ping_stat	*ping_stat;
 	double				total, avg, vari;
 
 	ping_finish(p);
-	if (p->ping_num_recv && PING_TIMING(prog->data_length))
+	if (p->ping_num_recv && PING_TIMING(g_prog.data_length))
 	{
 		ping_stat = (struct ping_stat *)p->ping_closure;
 		total = p->ping_num_recv + p->ping_num_rept;
