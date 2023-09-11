@@ -29,13 +29,15 @@ int ping_echo(char *hostname)
 	ping = g_prog.ping;
 	ping_stat.tmin = 999999999.0;
 	ping_stat.tmax = 0.0;
+	ping_stat.tsum = 0.0;
+	ping_stat.tsumsq = 0.0;
 	ping->ping_type = ICMP_ECHO;
 	ping->ping_datalen = g_prog.data_length;
 	ping->ping_event = handler;
 	ping->ping_closure = &ping_stat;
 	if (ping_set_dest(ping, hostname))
 		error(EXIT_FAILURE, 0, "unknown host");
-	printf("PING %s (%s) %zu(%zu) bytes of data.", ping->ping_hostname,
+	printf("PING %s (%s) %zu(%zu) bytes of data", ping->ping_hostname,
 		   inet_ntop(AF_INET, &ping->ping_dest.sin_addr, ip_readable,
 					 sizeof(ip_readable)),
 		   g_prog.data_length,
@@ -123,8 +125,27 @@ int echo_finish(t_ping *p)
 		total = p->ping_num_recv + p->ping_num_rept;
 		avg = ping_stat->tsum / total;
 		vari = ping_stat->tsumsq / total - avg * avg;
-		printf("rtt min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
+		printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
 			   ping_stat->tmin, avg, ping_stat->tmax, vari);
 	}
 	return (p->ping_num_recv == 0);
+}
+
+int	ping_finish(t_ping *ping)
+{
+	printf("--- %s ping statistics ---\n", ping->ping_hostname);
+	printf("%zu packets transmitted, ", ping->ping_num_xmit);
+	printf("%zu packets received, ", ping->ping_num_recv);
+	if (ping->ping_num_rept)
+		printf("+%zu duplicateds, ", ping->ping_num_rept);
+	if (ping->ping_num_xmit)
+	{	
+		if (ping->ping_num_recv > ping->ping_num_xmit)
+			printf("-- somebody is printing forged packets!");
+		else
+			printf("%d%% packet loss", (int)(((ping->ping_num_xmit
+				- ping->ping_num_recv) * 100) / ping->ping_num_xmit));
+	}
+	printf("\n");
+	return (0);
 }

@@ -44,7 +44,7 @@
 # define OPT_IPTIMESTAMP	0x040
 # define OPT_FLOWINFO		0x080
 # define OPT_TCLASS			0x100
-# define OPT_HELP			-1
+# define OPT_HELP			0x1000
 
 # define SOPT_TSONLY		0x001
 # define SOPT_TSADDR		0x002
@@ -95,6 +95,7 @@ typedef struct s_ping
 	struct timeval	ping_start_time;
 	size_t			ping_interval;
 	struct sockaddr_in	ping_dest;
+	struct sockaddr_in	ping_from;
 	char			*ping_hostname;
 	size_t			ping_datalen;
 	int				ping_ident;

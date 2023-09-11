@@ -24,36 +24,36 @@ static void	usage()
 	printf("	-v			verbose output\n");
 }
 
-static void	parse_opt(int key, int *options)
+static void	parse_opt(int key)
 {
 	switch (key)
 	{
 		case 'v':
-			*options |= OPT_VERBOSE;
+			g_prog.options |= OPT_VERBOSE;
 			break ;
 		case 'q':
-			*options |= OPT_QUIET;
+			g_prog.options |= OPT_QUIET;
 			break ;
 		case 'h':
-			*options |= OPT_HELP;
+			g_prog.options |= OPT_HELP;
 			break ;
 		case '?':
-			*options |= OPT_HELP;
+			g_prog.options |= OPT_HELP;
 			break ;
 		default:
 			break ;
 	}
 }
 
-static void	arg_parse(char **av, int *index, int *options,
-		void (*parse_opt)(int key, int *options))
+static void	arg_parse(char **av, int *index,
+	void (*parse_opt)(int key))
 {
 	int	i;
 	
 	i = 1;
-	while (av[i] && av[i][1] == '-' && ft_strlen(av[i]) > 1)
+	while (av[i] && av[i][0] == '-' && ft_strlen(av[i]) > 1)
 	{
-		(*parse_opt)(av[i][2], options);
+		(*parse_opt)(av[i][1]);
 		i++;
 	}
 	*index = i;
@@ -67,9 +67,12 @@ int	main(int ac, char **av)
 	ft_memset(&g_prog, 0, sizeof(g_prog));
 	g_prog.one = 1;
 	g_prog.prog_name = av[0];
-	arg_parse(av, &index, &g_prog.options, &parse_opt);
-	if (ac < 2 || g_prog.options < 0)
+	arg_parse(av, &index, &parse_opt);
+	if (ac < 2 || g_prog.options & OPT_HELP)
+	{
 		usage();
+		return (0);
+	}
 	ping = ping_init(ICMP_ECHO, getpid());
 	if (ping == NULL)
 		return (EXIT_FAILURE);
@@ -150,23 +153,4 @@ int	send_echo(t_ping *ping)
 	if (rc < 0)
 		error(EXIT_FAILURE, errno, "sending packet");
 	return (rc);
-}
-
-int	ping_finish(t_ping *ping)
-{
-	printf("--- %s ping statistics ---\n", ping->ping_hostname);
-	printf("%zu packets transmitted, ", ping->ping_num_xmit);
-	printf("%zu packets received, ", ping->ping_num_recv);
-	if (ping->ping_num_rept)
-		printf("+%zu duplicateds, ", ping->ping_num_rept);
-	if (ping->ping_num_xmit)
-	{	
-		if (ping->ping_num_recv > ping->ping_num_xmit)
-			printf("-- somebody is printing forged packets!");
-		else
-			printf("%d%% packet loss", (int)(((ping->ping_num_xmit
-				- ping->ping_num_recv) * 100) / ping->ping_num_xmit));
-	}
-	printf("\n");
-	return (0);
 }
