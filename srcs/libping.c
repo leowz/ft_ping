@@ -24,10 +24,10 @@ t_ping	*ping_init(int type, int ident)
 	int		useless_ident;
 
 	useless_ident = 0;
-	fd = socket(AF_INET, SOCK_RAW, ICMP);
+	fd = socket(AF_INET, SOCK_RAW | SOCK_NONBLOCK, ICMP);
 	if (fd < 0)
 	{
-		fd = socket(AF_INET, SOCK_DGRAM, ICMP);
+		fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, ICMP);
 		if (fd < 0)
 		{
 			printf("ping: %s\n", strerror(errno));
