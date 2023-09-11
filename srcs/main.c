@@ -86,13 +86,8 @@ int	main(int ac, char **av)
 		return (EXIT_FAILURE);
 	}
 	g_prog.ping = ping;
-	while (ac)
-	{
-		g_prog.status |= ping_echo(*av);
-		ping_reset(ping);
-		ac--;
-		av++;
-	}
+	g_prog.status |= ping_echo(*av);
+	ping_reset(ping);
 	free(g_prog.ping);
 	free(g_prog.data_buffer);
 	return (g_prog.status);
