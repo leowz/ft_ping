@@ -94,8 +94,7 @@ int		ping_emit(t_ping *p)
 	icmp_generic_encode(p->ping_buffer, buflen, p->ping_type,
 		p->ping_ident, p->ping_num_xmit);
 	i = sendto(p->ping_fd, (char *)p->ping_buffer, buflen, 0,
-		(struct sockaddr *)&p->ping_dest,
-		sizeof (struct sockaddr_in));
+		(struct sockaddr *)&p->ping_dest, sizeof (struct sockaddr_in));
 	if (i < 0)
 		return (-1);
 	else
