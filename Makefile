@@ -37,7 +37,7 @@ LDFLAGS 	= -L$(LIB_PATH) -lft
 DPFLAGS 	= -MD -MP
 
 CFLAGS 		=  $(foreach D, $(HEADER_PATH), -I$(D)) $(DPFLAGS) \
-				#-Wall -Wextra -Werror \
+				-Wall -Wextra -Werror \
 
 DEBUGF 		=  -fsanitize=address -g
 

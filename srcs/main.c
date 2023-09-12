@@ -95,6 +95,7 @@ int	main(int ac, char **av)
 
 void	sig_int(int signal)
 {
+	(void)signal;
 	g_prog.stop = 1;
 }
 
@@ -102,49 +103,21 @@ void	sig_int(int signal)
 
 int	ping_run(t_ping *ping, int (*finish)(t_ping *p))
 {
-	fd_set			fdset;
-	size_t			i;	
-	int				finishing, fdmax, n;
-	struct timeval	resp_time;
-  	struct timeval	last, intvl, now;
-
-	finishing = 0;
-	fdmax = ping->ping_fd + 1;
 	signal(SIGINT, sig_int);
-	ft_memset (&resp_time, 0, sizeof (resp_time));
-  	ft_memset (&intvl, 0, sizeof (intvl));
-  	ft_memset (&now, 0, sizeof (now));
-	ping_set_interval(&intvl, ping->ping_interval);
-	gettimeofday (&last, NULL);
 	send_echo (ping);
 	while (!g_prog.stop)
 	{
-		FD_ZERO (&fdset);
-		FD_SET (ping->ping_fd, &fdset);
-		gettimeofday (&now, NULL);
-		resp_time = ping_get_resp_time(last, now, intvl);
-		n = select (fdmax, &fdset, NULL, NULL, &resp_time);
-		if (n < 0)
+		usleep(ping->ping_interval * 1000);
+		ping_recv(ping);
+		if (!g_prog.stop && (!ping->ping_count ||
+			ping->ping_num_xmit < ping->ping_count))
 		{
-			if (errno != EINTR)
-				error(EXIT_FAILURE, errno, "select failed");
+			send_echo(ping);
+			if (!(g_prog.options & OPT_QUIET) && (g_prog.options & OPT_FLOOD))
+				ft_putchar('.');
 		}
-		else if (n == 1)
-			ping_recv(ping);
-		else
-		{
-			if (!ping->ping_count || ping->ping_num_xmit < ping->ping_count)
-			{
-				send_echo(ping);
-				if (!(g_prog.options & OPT_QUIET) && (g_prog.options & OPT_FLOOD))
-					ft_putchar('.');
-			}
-			else if (finishing)
-				break ;
-			else
-				finishing = 1;
-			gettimeofday (&last, NULL);
-		}
+		else 
+			break ;
 	}
 	ping_unset_data(ping);
 	if (finish)

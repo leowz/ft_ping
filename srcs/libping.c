@@ -123,7 +123,6 @@ static int	my_echo_reply(t_ping *p, icmphdr_t *icmp)
 
 int		ping_recv(t_ping *p)
 {
-	socklen_t		fromlen;
 	int				n, rc;
 	icmphdr_t		*icmp;
 	struct ip		*ip;
