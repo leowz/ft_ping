@@ -125,7 +125,7 @@ int echo_finish(t_ping *p)
 		avg = ping_stat->tsum / total;
 		vari = ping_stat->tsumsq / total - avg * avg;
 		printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
-			   ping_stat->tmin, avg, ping_stat->tmax, vari);
+			   ping_stat->tmin, avg, ping_stat->tmax, nsqrt(vari, 0.0005));
 	}
 	return (p->ping_num_recv == 0);
 }

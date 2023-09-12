@@ -37,6 +37,9 @@ static void	parse_opt(int key)
 		case 'h':
 			g_prog.options |= OPT_HELP;
 			break ;
+		case 'f':
+			g_prog.options |= OPT_FLOOD;
+			break ;
 		case '?':
 			g_prog.options |= OPT_HELP;
 			break ;
@@ -112,7 +115,13 @@ int	ping_run(t_ping *ping, int (*finish)(t_ping *p))
 	ft_memset (&resp_time, 0, sizeof (resp_time));
   	ft_memset (&intvl, 0, sizeof (intvl));
   	ft_memset (&now, 0, sizeof (now));
-	ping_set_interval(&intvl, ping->ping_interval);
+	if (g_prog.options & OPT_FLOOD)
+    {
+      intvl.tv_sec = 0;
+      intvl.tv_usec = 10000;
+    }
+	else
+		ping_set_interval(&intvl, ping->ping_interval);
 	gettimeofday (&last, NULL);
 	send_echo (ping);
 	while (!g_prog.stop)

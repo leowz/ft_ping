@@ -156,4 +156,5 @@ void    	ping_set_event_handler (t_ping *p, ping_efp pf, void *closure);
 int			echo_finish(t_ping *p);
 void		error(int status, int errnum, const char *msg);
 void		tvsub(struct timeval *out, struct timeval *in);
+double		nsqrt(double a, double prec);
 #endif
