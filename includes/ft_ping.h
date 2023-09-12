@@ -17,13 +17,14 @@
 # include <signal.h>
 # include <sys/time.h>
 # include <sys/socket.h>
+# include <sys/types.h>
+# include <sys/select.h>
 # include <errno.h>
 # include <netinet/in_systm.h>
 # include <netinet/in.h>
 # include <netinet/ip.h>
 # include <netinet/icmp6.h>
 # include <arpa/inet.h>
-# include <sys/types.h>
 # include <netdb.h>
 # include "libft.h"
 # include "icmp.h"
@@ -77,9 +78,7 @@ struct	ping_stat
 
 # define PING_DEFAULT_INTERVAL	1000      /* Milliseconds */
 # define PING_PRECISION		1000     /* Millisecond precision */
-
 # define MAX_IPOPTLEN		40
-
 # define _PING_BUFLEN(p) 	(MAXIPLEN + (p)->ping_datalen + ICMP_TSLEN)
 
 typedef int (*ping_efp) (int code, void *closure, struct sockaddr_in * dest,

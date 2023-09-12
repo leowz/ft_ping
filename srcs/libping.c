@@ -204,3 +204,25 @@ int		ping_set_dest(t_ping *p, const char *host)
 	freeaddrinfo(res);
 	return (0);
 }
+
+struct timeval	ping_get_resp_time(struct timeval last, struct timeval now,
+					struct timeval intvl)
+{
+	struct timeval	resp_time;
+
+	resp_time.tv_sec = last.tv_sec + intvl.tv_sec - now.tv_sec;
+	resp_time.tv_usec = last.tv_usec + intvl.tv_usec - now.tv_usec;
+	while (resp_time.tv_usec < 0)
+	{
+		resp_time.tv_usec += 1000000;
+		resp_time.tv_sec--;
+	}
+	while (resp_time.tv_usec >= 1000000)
+	{
+		resp_time.tv_usec -= 1000000;
+		resp_time.tv_sec++;
+	}
+	if (resp_time.tv_sec < 0)
+		resp_time.tv_sec = resp_time.tv_usec = 0;
+	return (resp_time);
+}
