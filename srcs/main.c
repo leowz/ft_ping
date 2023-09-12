@@ -95,15 +95,13 @@ int	main(int ac, char **av)
 
 void	sig_int(int signal)
 {
+	(void)signal;
 	g_prog.stop = 1;
 }
-
-
 
 int	ping_run(t_ping *ping, int (*finish)(t_ping *p))
 {
 	fd_set			fdset;
-	size_t			i;	
 	int				finishing, fdmax, n;
 	struct timeval	resp_time;
   	struct timeval	last, intvl, now;

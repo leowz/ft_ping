@@ -73,7 +73,7 @@ struct	ping_stat
 
 # define IPV4_HEADER_LEN	20
 # define PING_HEADER_LEN	(ICMP_MINLEN)
-# define PING_TIMING(s)		((s) >= sizeof (struct timeval))
+# define PING_TIMING(s)		((s) >= (int)sizeof (struct timeval))
 # define PING_DATALEN		(64 - PING_HEADER_LEN)  /* default data length */
 
 # define PING_DEFAULT_INTERVAL	1000      /* Milliseconds */

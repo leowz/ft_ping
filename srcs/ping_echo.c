@@ -17,7 +17,6 @@ static int print_echo(int dupflag, struct ping_stat *ping_stat,
 					  icmphdr_t *icmp, int datalen);
 static int handler(int code, void *closure, struct sockaddr_in *dest,
 				   struct ip *ip, icmphdr_t *icmp, int datalen);
-static void print_ip_opt(struct ip *ip, int hlen);
 
 int ping_echo(char *hostname)
 {

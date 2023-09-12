@@ -6,7 +6,7 @@
 #    By: zweng <zweng@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 14:11:10 by zweng             #+#    #+#              #
-#    Updated: 2023/09/10 16:03:09 by zweng            ###   ########.fr        #
+#    Updated: 2023/09/12 17:10:18 by zweng            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ LDFLAGS 	= -L$(LIB_PATH) -lft
 DPFLAGS 	= -MD -MP
 
 CFLAGS 		=  $(foreach D, $(HEADER_PATH), -I$(D)) $(DPFLAGS) \
-				#-Wall -Wextra -Werror \
+				-Wall -Wextra -Werror \
 
 DEBUGF 		=  -fsanitize=address -g
 
