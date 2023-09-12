@@ -17,6 +17,7 @@ static int print_echo(int dupflag, struct ping_stat *ping_stat,
 					  icmphdr_t *icmp, int datalen);
 static int handler(int code, void *closure, struct sockaddr_in *dest,
 				   struct ip *ip, icmphdr_t *icmp, int datalen);
+static void print_ip_opt(struct ip *ip, int hlen);
 
 int ping_echo(char *hostname)
 {
@@ -85,12 +86,6 @@ int print_echo(int dupflag, struct ping_stat *ping_stat,
 		tvsub(&tv, &tv1);
 		triptime = ((double)tv.tv_sec) * 1000.0 +
 				   ((double)tv.tv_usec) / 1000.0;
-		if (triptime > 1000.0)
-			triptime -= 1000.0;
-		else if (triptime <= 1000.0 && triptime > 0.0)
-			triptime = (int)(triptime) % 10 + triptime - (int)triptime;
-		else
-			triptime = 0.1;
 		ping_stat->tsum += triptime;
 		ping_stat->tsumsq += triptime * triptime;
 		if (triptime < ping_stat->tmin)
