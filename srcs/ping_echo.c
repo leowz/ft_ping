@@ -132,7 +132,7 @@ int echo_finish(t_ping *p)
 
 int	ping_finish(t_ping *ping)
 {
-	printf("--- %s ping statistics ---\n", ping->ping_hostname);
+	printf("\n--- %s ping statistics ---\n", ping->ping_hostname);
 	printf("%zu packets transmitted, ", ping->ping_num_xmit);
 	printf("%zu packets received, ", ping->ping_num_recv);
 	if (ping->ping_num_rept)
