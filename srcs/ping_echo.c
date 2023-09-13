@@ -142,8 +142,16 @@ int	ping_finish(t_ping *ping)
 		if (ping->ping_num_recv > ping->ping_num_xmit)
 			printf("-- somebody is printing forged packets!");
 		else
-			printf("%d%% packet loss", (int)(((ping->ping_num_xmit
-				- ping->ping_num_recv) * 100) / ping->ping_num_xmit));
+		{
+			if (g_prog.options & OPT_FLOOD)
+			{
+				printf("%.3f%% packet loss", (((double)(ping->ping_num_xmit
+					- ping->ping_num_recv) * 100) / (double)ping->ping_num_xmit));
+			}
+			else
+				printf("%d%% packet loss", (int)(((ping->ping_num_xmit
+					- ping->ping_num_recv) * 100) / ping->ping_num_xmit));
+		}
 	}
 	printf("\n");
 	return (0);
